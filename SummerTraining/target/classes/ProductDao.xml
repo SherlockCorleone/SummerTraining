@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ProductDao">
+	<insert id="insertProduct" parameterType="entity.Product" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
+		INSERT INTO
+		tb_product(product_name,product_desc,product_img_address,normal_price,promotion_price,priority,create_date,last_modify_date,status,product_category_id,shop_id)
+		VALUES
+		(#{productName},#{productDesc},#{productImgAddress},#{normalPrice},#{promotionPrice},#{priority},#{createDate},#{lastModifyDate},#{status},#{productCategory.productCategoryId},#{shop.shopId})
+	</insert>
+	<update id="updateProduct" parameterType="entity.Product" keyProperty="product_id" useGeneratedKeys="true">
+		UPDATE tb_product 
+		<set>
+		<if test="productImgAddress!=null">product_img_address=#{productImgAddress},</if>
+		<if test="productName!=null">product_name=#{productName},</if>
+		<if test="productDesc!=null">product_desc=#{productDesc},</if>
+		<if test="normalPrice!=null">normal_price=#{normalPrice},</if>
+		<if test="promotionPrice">promotion_price=#{promotionPrice},</if>
+		<if test="priority!=null">priority=#{priority},</if>
+		<if test="productCategory!=null and productCategory.productCategoryId!=null">product_category_id=#{productCategory.productCategoryId},</if>
+		<if test="lastModifyDate!=null">last_modify_date=#{lastModifyDate},</if>
+		<if test="status!=null">status=#{status},</if>
+		</set>
+		where product_id=#{productId} and shop_id=#{shop.shopId}
+	</update>
+	<resultMap type="entity.Product" id="productMap" >
+		<id column="product_id" property="productId"/>
+		<result column="product_name" property="productName"/>
+		<result column="product_desc" property="productDesc"/>
+		<result column="normal_price" property="normalPrice"/>
+		<result column="promotion_price" property="promotionPrice"/>
+		<result column="product_img_address" property="productImgAddress"/>
+		<result column="priority" property="priority"/>
+		<result column="create_date" property="createDate"/>
+		<result column="last_modify_date" property="lastModifyDate"/>
+		<result column="status" property="status"/>
+		<association column="product_category_id" property="productCategory" javaType="entity.ProductCategory">
+			<id column="product_category_id" property="productCategoryId"/>	
+			<result column="product_category_name" property="productCategoryName"/>
+		</association>
+		<association column="shop_id" property="shop" javaType="entity.Shop">
+			<id column="shop_id" property="shopId"/>
+			<result column="shop_name" property="shopName"/>
+			<result column="owner_id" property="ownerId"/>
+		</association>
+		<collection property="productImgList" column="product_id" ofType="entity.ProductImg">
+			<id column="product_img_id" property="productImgId"/>
+			<result column="img_address" property="imgAddress"/>
+			<result column="img_desc" property="imgDesc"/>
+			<result column="priority" property="priority"/>
+			<result column="product_id" property="productId"/>
+			<result column="create_date" property="createDate"/>
+		</collection>
+	</resultMap>
+	
+	<select id="queryProductByProductId" resultMap="productMap" parameterType="Long">
+	SELECT
+	p.product_id,p.product_name,p.product_desc,p.product_img_address,p.normal_price,p.promotion_price,p.priority,p.create_date,p.last_modify_date,p.status,p.product_category_id,p.shop_id,pi.product_img_id,pi.img_address,pi.img_desc,pi.priority,pi.create_date
+	from 
+	tb_product p LEFT JOIN tb_product_img pi ON pi.product_id=p.product_id
+	where
+	p.product_id=#{productId} 
+	order by pi.priority DESC
+	</select>
+	<select id="queryProduct" resultType="entity.Product">
+	SELECT * FROM tb_product 
+	<where>
+	 <if test="product.shop!=null and product.shop.shopId!=null">
+		and shop_id=#{product.shop.shopId}
+	</if>
+	<if test="product.productCategory!=null and product.productCategory.productCategoryId!=null">
+		and product_category_id=#{product.productCategory.productCategoryId}
+	</if>
+	<if test="product.productName!=null">
+	 	and product_name like '%${product.productName}%'
+	</if>
+	<if test="product.status!=null">
+		and status=#{product.status}
+	</if>
+	</where>
+	ORDER BY priority DESC
+	LIMIT #{rowIndex},#{pageSize}
+	</select>
+	<select id="queryProductCount" resultType="int">
+	SELECT count(1) FROM tb_product 
+	<where>
+	 <if test="product.shop!=null and product.shop.shopId!=null">
+		and shop_id=#{product.shop.shopId}
+	</if>
+	<if test="product.productCategory!=null and product.productCategory.productCategoryId!=null">
+		and product_category_id=#{product.productCategory.productCategoryId}
+	</if>
+	<if test="product.productName!=null">
+	 	and product_name like '%${product.productName}%'
+	</if>
+	<if test="product.status!=null">
+		and status=#{product.status}
+	</if>
+	</where>
+	</select>
+	<delete id="deleteProductByProductIdAndShopId" parameterType="Long">
+	delete from tb_product where product_id=#{productId} and shop_id=#{shopId}
+	</delete>
+</mapper>

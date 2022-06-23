@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.WechatDao">
+<resultMap id="map" type="entity.Wechat">
+<id column="wechat_id" property="wechatId"/>
+<result column="open_id" property="openId"/>
+<result column="create_date" property="createDate"/>
+<association property="user" column="user_id" javaType="entity.UserInfo">
+	<id column="user_id" property="userId"/>
+	<result column="user_name" property="userName"/>
+	<result column="user_gender" property="userGender"/>
+	<result column="user_email" property="userEmail"/>
+	<result column="user_image_address" property="userImageAddress"/>
+	<result column="status" property="status"/>
+	<result column="type" property="type"/>
+	<result column="create_date" property="createDate"/>
+	<result column="last_modify_date" property="lastModifyDate"/>
+</association>
+</resultMap>
+<select id="queryWechatByOpenId" resultMap="map" parameterType="String">
+	SELECT w.wechat_id,w.open_id,w.create_date,u.user_id,u.user_name,u.user_gender,u.user_email,u.status,u.type,u.create_date,u.last_modify_date
+	from tb_wechat w left join tb_user_info u ON w.user_id=u.user_id where w.open_id=#{openId}
+</select>
+<insert id="insertWechat" parameterType="entity.Wechat" useGeneratedKeys="true" keyProperty="wechatId" keyColumn="wechat_id">
+INSERT INTO tb_wechat(user_id,open_id,create_date)
+values(#{user.userId},#{openId},#{createDate})
+</insert>
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserInfoDao">
+<select id="queryUserInfoByUserId" resultType="entity.UserInfo" parameterType="Long">
+	SELECT * from tb_user_info where user_id=#{userId}
+</select>
+<insert id="insertUserInfo" parameterType="entity.UserInfo" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+	insert into tb_user_info(user_name,user_gender,user_email,user_image_address,status,type,create_date,last_modify_date)
+	VALUES(#{userName},#{userGender},#{userEmail},#{userImageAddress},#{status},#{type},#{createDate},#{lastModifyDate})
+</insert>
+</mapper>
